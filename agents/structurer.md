@@ -26,4 +26,6 @@ Start `.crispy/05_structure.md` with a one-line "Packaging strategy:" note copie
 
 ## Return Summary
 
-When `05_structure.md` is written, return a short summary to the orchestrator: packaging strategy, slice count, and the ordered slice names. Do NOT emit `/crispy:resume` instructions — you are invoked inside a larger orchestration that continues with the Planner automatically.
+When `05_structure.md` is written, return a summary to the orchestrator. The first line MUST be `STATUS: COMPLETE`. Then include: packaging strategy, slice count, and the ordered slice names. Do NOT emit `/crispy:resume` instructions — you are invoked inside a larger orchestration that continues with the Planner automatically.
+
+The Structurer should not normally need user input (it works only from the approved design). If the design is ambiguous in a way that materially changes slicing, surface it as a question instead of guessing: return a summary whose first line is `STATUS: NEEDS_USER_INPUT`, followed by a `<questions>` block as a JSON array matching the `AskUserQuestion` tool's input shape. The orchestrator will ask the user and re-invoke you with answers.

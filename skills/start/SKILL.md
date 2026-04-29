@@ -8,6 +8,30 @@ argument-hint: "Describe the feature or vertical slice you want to build"
 
 Initiates the CRISPY Orchestrator. This skill runs in the main conversation and orchestrates the Question → Research → Design auto-chain, stopping at the design human gate.
 
+## Ask-Loop Pattern (MANDATORY for every subagent invocation)
+
+Subagents cannot call `AskUserQuestion` — only the parent can. Wrap **every** subagent invocation in this loop:
+
+1. Invoke the subagent.
+2. Inspect the **first line** of its return summary:
+   - If it begins with `STATUS: COMPLETE` → the phase artifact is done. Continue to the next step.
+   - If it begins with `STATUS: NEEDS_USER_INPUT` → enter the ask sub-loop:
+     a. Locate the `<questions>...</questions>` block in the return. Parse the JSON array inside.
+     b. If `AskUserQuestion`'s schema is not yet loaded in this session, run `ToolSearch(query="select:AskUserQuestion")` once to load it.
+     c. Call `AskUserQuestion` with the parsed array as the `questions` parameter (it maps 1:1).
+     d. Re-invoke the **same subagent** with the original prompt PLUS a new `## User Answers` section appended:
+        ```
+        ## User Answers (from prior invocation)
+
+        - **<question text>:** <user-selected label> (notes: <any>)
+        - **<question text>:** <user-selected label>
+        ```
+        (If the user typed an "Other" answer, capture the custom text as the label and include any annotation notes.)
+     e. Loop back to step 2.
+   - If the first line is anything else, treat as a malformed return: report to the user and stop.
+
+Trust the subagent's return summary. Do NOT read its working files to second-guess `STATUS`.
+
 ## Steps
 
 Follow these steps in order. Do not skip, reorder, or add phases beyond step 6.
@@ -34,15 +58,15 @@ Do NOT rewrite, summarize, or reformat the user's words. If `$ARGUMENTS` is empt
 
 ### 3. Phase Q — Questioner
 
-Invoke the `crispy-questioner` subagent. Wait for it to return. The subagent writes `.crispy/02_questions.md`. If it collected user-owned inputs via `AskUserQuestion`, those interactions happened inside the subagent context — the main thread only sees the completion summary.
+Invoke the `crispy-questioner` subagent under the Ask-Loop Pattern above. The subagent writes `.crispy/02_questions.md`. Any user-owned questions are surfaced as a `<questions>` block — you (the parent) ask the user via `AskUserQuestion` and re-invoke until `STATUS: COMPLETE`.
 
 ### 4. Phase R — Researcher
 
-Invoke the `crispy-researcher` subagent. Wait for it to return. The subagent writes `.crispy/03_research.md` without reading `01_task.md` (context firewall).
+Invoke the `crispy-researcher` subagent under the Ask-Loop Pattern. It writes `.crispy/03_research.md` without reading `01_task.md` (context firewall). The Researcher should rarely need user input but the loop still applies.
 
 ### 5. Phase D — Architect
 
-Invoke the `crispy-architect` subagent. Wait for it to return. The subagent writes `.crispy/04_design.md`, updates `adr/<iteration-name>.adr.md`, and may call `AskUserQuestion` during its work.
+Invoke the `crispy-architect` subagent under the Ask-Loop Pattern. It writes `.crispy/04_design.md` and updates `adr/<iteration-name>.adr.md`. Expect at least one `STATUS: NEEDS_USER_INPUT` round for mandatory validation categories (tooling, packaging strategy, etc.).
 
 ### 6. Human gate — STOP
 

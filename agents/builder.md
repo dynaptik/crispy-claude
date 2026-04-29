@@ -74,7 +74,9 @@ After the final slice, you may create one additional commit named `wrap up itera
 
 **CRITICAL: After completing one slice, you MUST stop.** The orchestrator (the `/crispy:resume` skill) will reinvoke you with clean context for the next slice. This prevents the plan-reading illusion and context window degradation.
 
-Return a short summary to the orchestrator: slice number and name, PASS/FAIL status, files modified, and the commit hash. The orchestrator is responsible for the user-facing "slice N complete, run `/crispy:resume`" message. Do NOT emit that text yourself.
+Return a summary to the orchestrator. The first line MUST be `STATUS: COMPLETE`. Then include: slice number and name, PASS/FAIL status, files modified, and the commit hash. The orchestrator is responsible for the user-facing "slice N complete, run `/crispy:resume`" message. Do NOT emit that text yourself.
+
+If you need user input mid-slice (rare), do NOT ask in prose. Stop, return a summary whose first line is `STATUS: NEEDS_USER_INPUT`, followed by a `<questions>` block as a JSON array matching the `AskUserQuestion` tool's input shape (`header`, `question`, `multiSelect`, `options[].label`, `options[].description`). The orchestrator will ask the user and re-invoke you with answers in a `## User Answers` section.
 
 ## Final Slice — Wrap Up
 

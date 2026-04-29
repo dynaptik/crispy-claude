@@ -56,4 +56,6 @@ For greenfield projects, use `Question: [Q] | Design Decision Required — [brie
 
 ## Return Summary
 
-When `03_research.md` is written, return a short summary to the orchestrator: count of answered questions, count of `Context Missing` or `Design Decision Required` items, and any material infrastructure facts that affect design. Do NOT emit `/crispy:resume` instructions — you are invoked inside a larger orchestration.
+When `03_research.md` is written, return a summary to the orchestrator. The first line MUST be `STATUS: COMPLETE`. Then include: count of answered questions, count of `Context Missing` or `Design Decision Required` items, and any material infrastructure facts that affect design. Do NOT emit `/crispy:resume` instructions — you are invoked inside a larger orchestration.
+
+The Researcher should not normally need user input (it works only from codebase facts). If a fact is genuinely undecidable from the codebase and blocks meaningful research, surface it as a question instead of guessing: return a summary whose first line is `STATUS: NEEDS_USER_INPUT`, followed by a `<questions>` block as a JSON array matching the `AskUserQuestion` tool's input shape. The orchestrator will ask the user and re-invoke you with answers.
