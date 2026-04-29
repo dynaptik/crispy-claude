@@ -1,0 +1,22 @@
+{
+  "name": "crispy",
+  "version": "1.0.0",
+  "description": "CRISPY (QRSPI) multi-agent orchestration plugin — 8-phase state machine with context firewalls, vertical slice enforcement, and instruction budgeting for reliable agentic coding.",
+  "author": {
+    "name": "Danijel Milicevic",
+    "url": "https://github.com/dynaptik"
+  },
+  "homepage": "https://github.com/dynaptik/crispy-claude",
+  "repository": "https://github.com/dynaptik/crispy-claude",
+  "license": "MIT",
+  "keywords": [
+    "crispy",
+    "qrspi",
+    "orchestration",
+    "multi-agent",
+    "vertical-slice",
+    "context-firewall",
+    "coding-agent",
+    "state-machine"
+  ]
+}

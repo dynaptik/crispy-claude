@@ -1,0 +1,18 @@
+# --- CRISPY Internal State ---
+# Do NOT sync the actual vertical slice data or active worktrees
+.crispy/
+.crispy-worktree/
+
+# --- Environment & OS ---
+.env
+.DS_Store
+Thumbs.db
+
+# --- Editors ---
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# --- Claude Code local ---
+.claude/settings.local.json
